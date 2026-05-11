@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>I&C SPACE 室内设计需求问卷</title>
+<title>张岭设计工作室 · 室内设计需求问卷</title>
 <style>
   :root {
     --bg: #fafaf8;
@@ -1288,12 +1288,32 @@ function showCompletion() {
       <div class="completion-title">需求问卷已完成！</div>
       <div class="completion-text">
         您已回答了 <strong>${answeredCount}</strong> / ${allQuestions.length} 道问题<br>
-        感谢您花时间填写，我们将根据您的需求为您打造专属空间。
+        下方可预览结果，提交后将发送至设计工作室。
       </div>
-      <div class="summary-section">${summary}</div>
-      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-        <button class="btn btn-secondary" onclick="window.print()">打印结果</button>
-        <button class="btn btn-primary" onclick="resetQuestionnaire()">重新填写</button>
+      <div class="summary-section" id="summaryPreview">${summary}</div>
+
+      <div id="submitSection" style="margin-top:24px;padding-top:24px;border-top:1px solid var(--border);text-align:left">
+        <h4 style="font-size:16px;font-weight:600;margin-bottom:8px;color:var(--text)">提交需求到设计工作室</h4>
+        <p style="font-size:13px;color:var(--text-light);margin-bottom:16px">提交后我们将尽快与您联系，沟通设计方案。</p>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <input class="text-input" id="clientName" placeholder="您的称呼 *" required>
+          <input class="text-input" id="clientPhone" placeholder="手机号 / 微信号 *" required>
+          <input class="text-input" id="clientEmail" placeholder="电子邮箱（选填）">
+          <input class="text-input" id="clientNote" placeholder="其他补充说明（选填）">
+        </div>
+        <div style="margin-top:16px;display:flex;flex-direction:column;gap:10px">
+          <button class="btn btn-primary" id="submitBtn" onclick="submitResults()" style="width:100%">
+            提交到设计工作室
+          </button>
+          <button class="btn btn-secondary" onclick="resetQuestionnaire()" style="width:100%">
+            重新填写
+          </button>
+        </div>
+        <p id="submitStatus" style="margin-top:12px;font-size:13px;text-align:center"></p>
+        <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);text-align:center">
+          <p style="font-size:12px;color:var(--text-light)">或直接联系设计师</p>
+          <p style="font-size:14px;color:var(--accent);font-weight:500;margin-top:4px">微信：18627994636</p>
+        </div>
       </div>
     </div>
   `;
@@ -1313,13 +1333,116 @@ function resetQuestionnaire() {
   showWelcome();
 }
 
+// ===== SUBMIT RESULTS =====
+// 使用 Web3Forms (web3forms.com) 免费服务发送邮件
+// 请将下面的 ACCESS_KEY 替换为你自己的 key：
+//   1. 打开 https://web3forms.com
+//   2. 输入你的邮箱 → 点击 "Get Access Key"
+//   3. 将收到的 Access Key 替换下面这行
+const WEB3FORMS_KEY = 'c1bf9d3b-8b77-47ec-aae3-3f44754f35ae';
+
+function submitResults() {
+  const clientName = document.getElementById('clientName').value.trim();
+  const clientPhone = document.getElementById('clientPhone').value.trim();
+  const clientEmail = document.getElementById('clientEmail').value.trim();
+  const clientNote = document.getElementById('clientNote').value.trim();
+  const statusEl = document.getElementById('submitStatus');
+  const submitBtn = document.getElementById('submitBtn');
+
+  if (!clientName || !clientPhone) {
+    statusEl.innerHTML = '<span style="color:#e74c3c">请至少填写称呼和手机号/微信号</span>';
+    return;
+  }
+
+  if (WEB3FORMS_KEY === 'YOUR_ACCESS_KEY_HERE') {
+    statusEl.innerHTML = '<span style="color:#e74c3c">网站尚未配置邮件接收，请联系设计师。微信：18627994636</span>';
+    return;
+  }
+
+  // 构建邮件正文
+  let bodyText = `客户称呼：${clientName}\n联系方式：${clientPhone}`;
+  if (clientEmail) bodyText += `\n电子邮箱：${clientEmail}`;
+  if (clientNote) bodyText += `\n补充说明：${clientNote}`;
+  bodyText += `\n\n===== 需求问卷详细结果 =====\n\n`;
+  bodyText += formatAnswersForEmail();
+  bodyText += `\n\n提交时间：${new Date().toLocaleString('zh-CN')}`;
+
+  submitBtn.disabled = true;
+  submitBtn.textContent = '正在提交...';
+  statusEl.innerHTML = '<span style="color:var(--text-light)">正在发送...</span>';
+
+  fetch('https://api.web3forms.com/submit', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      access_key: WEB3FORMS_KEY,
+      subject: `【室内设计需求】${clientName} - ${clientPhone}`,
+      from_name: '设计需求问卷系统',
+      name: clientName,
+      email: clientEmail || 'no-reply@questionnaire.local',
+      message: bodyText,
+    })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      statusEl.innerHTML = '<span style="color:#27ae60">✓ 提交成功！我们会尽快与您联系。</span>';
+      submitBtn.textContent = '已提交';
+    } else {
+      throw new Error(data.message || '提交失败');
+    }
+  })
+  .catch(err => {
+    statusEl.innerHTML = '<span style="color:#e74c3c">提交失败，请截图结果页面发送至设计师微信：18627994636</span>';
+    submitBtn.disabled = false;
+    submitBtn.textContent = '重新提交';
+  });
+}
+
+function formatAnswersForEmail() {
+  let text = '';
+  sections.forEach(s => {
+    if (!s.questions) return;
+    let hasContent = false;
+    let sectionText = `【${s.title}】\n`;
+    s.questions.forEach(q => {
+      const ans = answers[q.id];
+      if (!ans || (Array.isArray(ans) && ans.length === 0) || (typeof ans === 'object' && Object.keys(ans).length === 0 && !answers[q.id + '__extra'])) return;
+      hasContent = true;
+      let ansText = '';
+      if (q.type === 'checkbox') {
+        ansText = Array.isArray(ans) ? ans.join('、') : '';
+        if (answers[q.id + '__extra']) ansText += (ansText ? '；' : '') + answers[q.id + '__extra'];
+      } else if (q.type === 'multi-text') {
+        ansText = Object.entries(ans).map(([k, v]) => `${(q.fields||[]).find(f=>f.key===k)?.label||k}: ${v}`).join('；');
+      } else if (q.type === 'radio-group') {
+        ansText = Object.entries(ans).map(([k, v]) => `${k}: ${v}`).join('；');
+      } else if (q.type === 'child-info') {
+        ansText = ans.filter(c => c.name || c.age).map(c => `${c.name}(${c.age}岁)`).join('、');
+      } else if (q.type === 'choice-text') {
+        ansText = `${ans.choice || ''}`;
+        if (ans.text) ansText += ` — ${ans.text}`;
+      } else if (q.type === 'text') {
+        let prefix = answers[q.id + '__prefix'] ? answers[q.id + '__prefix'] + ' ' : '';
+        ansText = prefix + ans;
+      } else {
+        ansText = String(ans);
+        if (answers[q.id + '__extra']) ansText += '；' + answers[q.id + '__extra'];
+      }
+      sectionText += `  ${q.title}：${ansText}\n`;
+    });
+    if (hasContent) text += sectionText;
+  });
+  return text;
+}
+
 // ===== WELCOME SCREEN =====
 function showWelcome() {
   hideProgress();
   const container = document.getElementById('mainContainer');
   container.innerHTML = `
     <div class="question-card welcome-card">
-      <div class="welcome-logo">I&C SPACE</div>
+      <div class="welcome-logo">张岭设计工作室</div>
       <div class="welcome-tagline">
         每一个住宅的属性都是独一无二，不可复制的<br>
         设计是一场心灵的旅途，而非物质堆砌<br>
