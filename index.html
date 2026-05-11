@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>I&C SPACE 室内设计需求问卷</title>
+<style>
+  :root {
+    --bg: #fafaf8;
+    --card-bg: #ffffff;
+    --text: #2c2c2c;
+    --text-light: #6b6b6b;
+    --accent: #c2855b;
+    --accent-dark: #a06d48;
+    --accent-light: #f5ebe3;
+    --progress-bg: #e8e4df;
+    --border: #e8e4df;
+    --shadow: 0 2px 16px rgba(0,0,0,0.06);
+    --radius: 12px;
+    --transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+
+  /* ===== PROGRESS BAR ===== */
+  .progress-wrapper {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 24px;
+  }
+  .progress-inner {
+    max-width: 680px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .progress-track {
+    flex: 1;
+    height: 6px;
+    background: var(--progress-bg);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #c2855b, #d4a57a);
+    border-radius: 3px;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 0%;
+  }
+  .progress-text {
+    font-size: 13px;
+    color: var(--text-light);
+    white-space: nowrap;
+    font-weight: 500;
+    min-width: 48px;
+    text-align: right;
+  }
+  .section-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  /* ===== MAIN CONTAINER ===== */
+  .main-container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 100px 24px 60px;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ===== CARD ===== */
+  .question-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    padding: 48px 44px 40px;
+    width: 100%;
+    animation: fadeSlideIn 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid var(--border);
+  }
+  .question-card.no-anim { animation: none; }
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .question-card.out { animation: fadeSlideOut 0.25s ease-in forwards; }
+
+  .question-number {
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 8px;
+  }
+  .question-title {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+    line-height: 1.4;
+  }
+  .question-subtitle {
+    font-size: 14px;
+    color: var(--text-light);
+    margin-bottom: 32px;
+  }
+
+  /* ===== OPTIONS ===== */
+  .options-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    list-style: none;
+  }
+  .option-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 16px 20px;
+    background: #fafaf8;
+    border: 2px solid transparent;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    color: var(--text);
+    transition: all 0.2s ease;
+    text-align: left;
+    font-family: inherit;
+  }
+  .option-btn {
+    touch-action: manipulation;
+  }
+  .option-btn:hover {
+    background: var(--accent-light);
+    border-color: var(--accent);
+  }
+  .option-btn:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
+  .option-btn.selected {
+    background: var(--accent-light);
+    border-color: var(--accent);
+    color: var(--accent-dark);
+    font-weight: 500;
+  }
+  .option-radio {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 2px solid #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+  }
+  .option-btn.selected .option-radio {
+    border-color: var(--accent);
+    background: var(--accent);
+  }
+  .option-btn.selected .option-radio::after {
+    content: '';
+    width: 8px; height: 8px;
+    background: white;
+    border-radius: 50%;
+  }
+
+  /* Checkbox style */
+  .option-check {
+    width: 22px; height: 22px;
+    border-radius: 4px;
+    border: 2px solid #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+  }
+  .option-btn.selected .option-check {
+    border-color: var(--accent);
+    background: var(--accent);
+  }
+  .option-btn.selected .option-check::after {
+    content: '✓';
+    color: white;
+    font-size: 13px;
+    font-weight: bold;
+  }
+
+  /* ===== TEXT INPUT ===== */
+  .text-input {
+    width: 100%;
+    padding: 14px 18px;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    font-size: 16px;
+    font-family: inherit;
+    color: var(--text);
+    background: #fafaf8;
+    transition: border-color 0.2s ease;
+    outline: none;
+  }
+  .text-input:focus {
+    border-color: var(--accent);
+    background: white;
+  }
+  .text-input::placeholder { color: #bfbfbf; }
+
+  /* ===== BUTTONS ===== */
+  .btn-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 36px;
+    gap: 14px;
+  }
+  .btn {
+    padding: 14px 32px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+  }
+  .btn-primary:hover {
+    background: var(--accent-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(194,133,91,0.3);
+  }
+  .btn-primary:disabled {
+    background: #d9d9d9;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+  .btn-secondary {
+    background: transparent;
+    color: var(--text-light);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover {
+    background: #f5f5f5;
+    color: var(--text);
+  }
+
+  /* ===== WELCOME SCREEN ===== */
+  .welcome-card {
+    text-align: center;
+    padding: 64px 44px;
+  }
+  .welcome-logo {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--accent-dark);
+    margin-bottom: 8px;
+  }
+  .welcome-tagline {
+    font-size: 15px;
+    color: var(--text-light);
+    max-width: 420px;
+    margin: 0 auto 40px;
+    line-height: 1.7;
+  }
+  .welcome-stats {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-bottom: 44px;
+  }
+  .welcome-stat {
+    text-align: center;
+  }
+  .welcome-stat-num {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .welcome-stat-label {
+    font-size: 12px;
+    color: var(--text-light);
+    margin-top: 2px;
+  }
+  .start-btn {
+    padding: 18px 56px;
+    font-size: 18px;
+  }
+
+  /* ===== COMPLETION SCREEN ===== */
+  .completion-card { text-align: center; padding: 56px 44px; }
+  .completion-icon {
+    font-size: 56px;
+    margin-bottom: 20px;
+  }
+  .completion-title {
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+  .completion-text {
+    color: var(--text-light);
+    margin-bottom: 32px;
+    line-height: 1.7;
+  }
+  .summary-section {
+    text-align: left;
+    background: #fafaf8;
+    border-radius: 10px;
+    padding: 24px;
+    margin-bottom: 20px;
+    max-height: 360px;
+    overflow-y: auto;
+  }
+  .summary-section h4 {
+    font-size: 14px;
+    color: var(--accent);
+    margin-bottom: 10px;
+    margin-top: 16px;
+  }
+  .summary-section h4:first-child { margin-top: 0; }
+  .summary-section p {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.6;
+    margin-bottom: 4px;
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 600px) {
+    body {
+      font-size: 15px;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    .main-container {
+      padding: 80px 10px 36px;
+      align-items: flex-start;
+    }
+    .progress-wrapper {
+      padding: 10px 14px;
+    }
+    .progress-inner { gap: 8px; }
+    .section-label { font-size: 10px; letter-spacing: 0.04em; }
+    .progress-text { font-size: 11px; min-width: 36px; }
+    .question-card {
+      padding: 28px 18px 24px;
+      border-radius: 14px;
+    }
+    .question-card.welcome-card { padding: 40px 20px; }
+    .question-card.completion-card { padding: 36px 18px; }
+    .question-number { font-size: 11px; }
+    .question-title { font-size: 17px; line-height: 1.45; }
+    .question-subtitle { font-size: 13px; margin-bottom: 24px; }
+    .option-btn {
+      padding: 14px 14px;
+      font-size: 15px;
+      border-radius: 10px;
+      gap: 10px;
+      min-height: 48px;
+    }
+    .option-radio, .option-check { width: 20px; height: 20px; }
+    .btn-row {
+      flex-direction: column-reverse;
+      gap: 10px;
+      margin-top: 28px;
+    }
+    .btn {
+      width: 100%;
+      text-align: center;
+      padding: 14px 20px;
+      font-size: 15px;
+      min-height: 48px;
+    }
+    .welcome-stats { gap: 16px; margin-bottom: 32px; }
+    .welcome-stat-num { font-size: 26px; }
+    .welcome-logo { font-size: 24px; }
+    .welcome-tagline { font-size: 14px; }
+    .start-btn { padding: 16px 40px; font-size: 16px; }
+    .completion-title { font-size: 22px; }
+    .completion-icon { font-size: 44px; }
+    .summary-section { max-height: 280px; padding: 16px; }
+    .summary-section h4 { font-size: 13px; }
+    .summary-section p { font-size: 13px; }
+    .text-input { font-size: 16px; padding: 12px 14px; }
+  }
+
+  /* iOS safe area support */
+  @supports (padding-bottom: env(safe-area-inset-bottom)) {
+    .main-container {
+      padding-bottom: calc(36px + env(safe-area-inset-bottom));
+    }
+  }
+
+  /* Prevent auto-zoom on iOS */
+  @media screen and (-webkit-min-device-pixel-ratio: 0) {
+    input[type="text"], input[type="text"]:focus {
+      font-size: 16px !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- Progress Bar -->
+<div class="progress-wrapper" id="progressBar" style="display:none">
+  <div class="progress-inner">
+    <span class="section-label" id="sectionLabel"></span>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+    <span class="progress-text" id="progressText">0%</span>
+  </div>
+</div>
+
+<!-- Main Container -->
+<div class="main-container" id="mainContainer"></div>
+
+<script>
+// ===== QUESTION DATA =====
+const sections = [
+  {
+    id: 'welcome',
+    type: 'welcome'
+  },
+  {
+    id: 'basic',
+    title: '基础信息',
+    questions: [
+      { id: 'q1_1', title: '我们如何称呼您？', subtitle: '请选择称谓并填写您的姓名', type: 'text', placeholder: '请输入您的姓名', prefix: 'prefix', prefixLabel: '称谓', prefixOptions: ['先生', '女士'] },
+      { id: 'q1_2', title: '项目名称及所在城市区域', type: 'text', placeholder: '例如：北京朝阳区' },
+      { id: 'q1_3', title: '项目户型及建筑面积', type: 'multi-text', fields: [
+        { key: 'houseType', placeholder: '户型（如：三室两厅）', label: '户型' },
+        { key: 'area', placeholder: '建筑面积（㎡）', label: '建筑面积' }
+      ]},
+      { id: 'q1_4', title: '项目朝向', type: 'radio', options: ['东', '南', '西', '北', '其它'] },
+      { id: 'q1_5', title: '房屋结构形式', subtitle: '您可以咨询销售或开发商代表确定', type: 'radio', options: ['框架剪力墙结构', '砖混结构', '木结构', '钢结构', '钢混框架结构', '砖木结构', '轻钢结构', '其它结构'] },
+      { id: 'q1_6', title: '您对房子装修整体单平米投入的初步预期', subtitle: '施工+主材+设备+软装+电器', type: 'radio', options: ['5000-8000元/平米', '8000-12000元/平米', '12000-15000元/平米', '15000-20000元/平米', '20000元/平米及以上'] },
+      { id: 'q1_7', title: '目前房子的归属状态', type: 'radio', options: ['准备购买', '正在购买中，未完成过户', '已购买，过户已完成'] },
+      { id: 'q1_8', title: '房子是现房还是期房？', type: 'choice-text', options: ['现房', '期房'], textLabel: '如果是期房，交房时间' },
+      { id: 'q1_9', title: '房子使用倾向', type: 'radio', options: ['第一居所', '第二居所', '度假', '养老', '会所', '投资', '婚房', '其他商业用途'] },
+    ]
+  },
+  {
+    id: 'members',
+    title: '家庭成员',
+    questions: [
+      { id: 'q2_1', title: '家庭常住成员', type: 'checkbox', options: ['男主人', '女主人', '男方老人', '女方老人', '工人', '管家', '司机'], hasExtra: true, extraPlaceholder: '如有其它居住成员请说明' },
+      { id: 'q2_2', title: '孩子信息', subtitle: '请勾选并填写孩子的姓名和年龄', type: 'child-info' },
+      { id: 'q2_3', title: '您的住宅是什么类型的建筑？', type: 'radio', options: ['独栋', '类独栋', '双拼', '联排', '叠拼', '平墅', '花园洋房', '单层公寓', '合院', '复式'] },
+      { id: 'q2_4', title: '房屋内现有设备', type: 'checkbox', options: ['空调', '地暖', '新风', '智能', '水处理', '锅炉', '储水罐', '污水提升泵', '电梯', '地源热泵系统', '空气源热泵系统', '太阳能', '燃气表', '消火栓', '喷淋', '烟感', '安防'] },
+    ]
+  },
+  {
+    id: 'renovation',
+    title: '改造需求',
+    questions: [
+      { id: 'q3_1', title: '首层入户门是否需要更换？', type: 'radio', options: ['是', '否'] },
+      { id: 'q3_2', title: '车库入户门是否需要更换？', type: 'radio', options: ['是', '否'] },
+      { id: 'q3_3', title: '所有外窗是否考虑全部更换？', type: 'radio', options: ['是', '否'] },
+      { id: 'q3_4', title: '是否需要在家养宠物？', type: 'text', placeholder: '如有请说明宠物种类' },
+      { id: 'q3_5', title: '扩建需求', type: 'checkbox', options: ['首层扩建', '地下空间扩建', '封阳台或封露台', '挑空封楼板'] },
+      { id: 'q3_6', title: '目前对房子非常不满意的地方', type: 'text', placeholder: '请说明' },
+    ]
+  },
+  {
+    id: 'entry',
+    title: '玄关厅',
+    questions: [
+      { id: 'q4_1', title: '玄关厅储物要求', type: 'checkbox', options: ['拖鞋', '男鞋', '女鞋', '儿童鞋', '短衣', '长衣', '雨具', '伴手礼', '高尔夫球包', '潜水服', '篮球/足球', '网球/羽毛球', '婴儿车', '滑雪雪具', '小型行李箱', '大型行李箱', '儿童驾驶玩具车', '轮椅', '快递存放区', '工具箱'], hasExtra: true, extraPlaceholder: '其他储物需求' },
+    ]
+  },
+  {
+    id: 'reception',
+    title: '会客及交流空间',
+    questions: [
+      { id: 'q5_1', title: '平常有什么样的会客需求？', type: 'checkbox', options: ['家庭聚会', '工作及商务接待', '朋友来访', '邻居来访', '小朋友聚会', '不接待客人', '家庭私教上门'], hasExtra: true, extraPlaceholder: '其他' },
+      { id: 'q5_2', title: '喜欢什么样的沙发形式？', type: 'radio', options: ['沙发3+2+1等常规布局', '组合转角沙发布局', '对坐沙发方式', '沙发自由摆放', '不想要沙发，想要一个自由的开敞空间'] },
+      { id: 'q5_3', title: '此空间的功能需求', type: 'checkbox', options: ['电视', '投影', '听音乐', '喝茶', '聊天', '游戏', '上网', '小憩', '办公'] },
+      { id: 'q5_4', title: '需要放书和阅读的地方吗？', type: 'radio', options: ['需要', '不需要'] },
+      { id: 'q5_5', title: '会放置以下乐器吗？', type: 'checkbox', options: ['钢琴', '古筝', '吉他', '架子鼓', '提琴', '暂时不放乐器'], hasExtra: true, extraPlaceholder: '其它类别' },
+      { id: 'q5_6', title: '会展示艺术品或收藏品吗？', type: 'radio', options: ['有', '暂时没有'], hasExtra: true, extraPlaceholder: '收藏品类别' },
+      { id: 'q5_7', title: '需要设置茶室以及专业的喝茶工具吗？', type: 'radio', options: ['需要', '不需要'] },
+      { id: 'q5_8', title: '是否需要亲子空间？', type: 'radio', options: ['需要', '不需要'] },
+      { id: 'q5_9', title: '如果需要壁炉，采用什么形式？', type: 'radio', options: ['炭火壁炉', '电加热壁炉'] },
+      { id: 'q5_10', title: '沙发区域是否需要地毯？', type: 'radio', options: ['需要', '不需要'] },
+      { id: 'q5_11', title: '此空间有无其他特殊功能需求？', type: 'text', placeholder: '请填写' },
+    ]
+  },
+  {
+    id: 'dining',
+    title: '餐厅空间',
+    questions: [
+      { id: 'q6_1', title: '对于餐厅空间的形式，您更喜欢？', type: 'radio', options: ['开放式餐厅', '独立空间式餐厅'] },
+      { id: 'q6_2', title: '平时在家多少人用餐？', type: 'radio-group', groups: [
+        { label: '日常', options: ['2~4', '4~6', '4~8', '8人以上'] },
+        { label: '宴请', options: ['6~8', '8~10', '10~15', '15人以上'] },
+        { label: '节日', options: ['6~8', '8~10', '10~15', '15人以上'] }
+      ]},
+      { id: 'q6_3', title: '您及家人喜欢用什么形式的餐桌？', type: 'radio', options: ['圆桌', '长方形桌'] },
+      { id: 'q6_4', title: '餐厅是否需要电视？', type: 'radio', options: ['是', '否'] },
+      { id: 'q6_5', title: '对餐厅空间有什么储物要求？', type: 'checkbox', options: ['书柜', '酒柜', '展示柜', '餐边柜'], hasExtra: true, extraPlaceholder: '其他需求' },
+      { id: 'q6_6', title: '日常生活中您的孩子会与您经常一起用餐吗？', type: 'radio', options: ['是', '否'] },
+      { id: 'q6_7', title: '是否需要儿童专用用餐区？', type: 'radio', options: ['是', '否'] },
+      { id: 'q6_8', title: '是否需要带有休闲功能的等餐区或备餐区？', type: 'radio', options: ['是', '否'] },
+      { id: 'q6_9', title: '餐厅是否需要增加壁炉？', type: 'radio', options: ['是', '否'] },
+      { id: 'q6_10', title: '您及家人生活中，经常在家吃火锅吗？', type: 'radio', options: ['是', '否'] },
+      { id: 'q6_11', title: '您及家人饮食习惯更倾向于？', type: 'radio', options: ['中餐', '西餐', '中餐居多，偶尔做西餐', '西餐居多，偶尔做中餐'] },
+    ]
+  },
+  {
+    id: 'kitchen',
+    title: '厨房空间',
+    questions: [
+      { id: 'q7_1', title: '主人和工人是否需要独立的厨房？', type: 'radio', options: ['是', '否'] },
+      { id: 'q7_2', title: '主人和工人谁使用频率更高？', type: 'radio', options: ['主人', '工人'] },
+      { id: 'q7_3', title: '厨房使用功能需求', type: 'checkbox', options: ['中厨', '西厨', '干货间', '餐具间', '冷藏间', '食品间', '操作间'], hasExtra: true, extraPlaceholder: '其他功能' },
+      { id: 'q7_4', title: '厨房需要哪些配置？', type: 'checkbox', options: ['岛台', '吧台', '早餐厅', '休闲区'] },
+      { id: 'q7_5', title: '厨房一般会有几个人一起操作烹饪？', type: 'radio', options: ['1人', '2人', '3人', '更多'] },
+      { id: 'q7_6', title: '厨房是少有烹饪还是经常烹调美食大餐？', type: 'radio', options: ['经常', '少有'] },
+      { id: 'q7_7', title: '对厨房电器的需求有哪些？', type: 'checkbox', options: ['电烤箱', '电蒸箱', '微波炉', '消毒柜', '洗碗机', '冰箱', '咖啡机', '垃圾处理器', '豆浆机', '面包机', '净水设备', '冰柜', '酒柜', '真空抽', '蒸烤一体机', '水果保鲜柜', '榨汁机'], hasExtra: true, extraPlaceholder: '其他电器' },
+      { id: 'q7_8', title: '喜欢使用什么样的灶具？', type: 'checkbox', options: ['专业厨房灶', '双头燃气灶', '三头燃气灶', '多头燃气灶', '电磁炉', '电陶炉', '升降烟机', '集成灶'], hasExtra: true, extraPlaceholder: '其它灶具' },
+      { id: 'q7_9', title: '厨房内是否需要增加防水电视？', type: 'radio', options: ['是', '否'] },
+      { id: 'q7_10', title: '西厨区是否考虑做二次排烟处理？', type: 'radio', options: ['是', '否'] },
+      { id: 'q7_11', title: '为适应不同国家电器电压标准，是否考虑双电压设计？', type: 'radio', options: ['是', '否'] },
+      { id: 'q7_12', title: '需要什么样的锅具？', type: 'checkbox', options: ['奶锅', '平底煎锅', '炖锅', '玻璃高温炖锅', '汤锅', '炒锅', '电蒸锅', '电饭煲', '电火锅', '电饼铛', '大铁锅', '压力锅'], hasExtra: true, extraPlaceholder: '其他锅具' },
+      { id: 'q7_13', title: '需要几个冰箱？', type: 'radio', options: ['一个', '两个', '三个', '更多'] },
+      { id: 'q7_14', title: '冰箱是否做内嵌式处理？', type: 'radio', options: ['是', '否'] },
+      { id: 'q7_15', title: '冰箱制冰功能是否需要连接给水管？', type: 'radio', options: ['是', '否'] },
+    ]
+  },
+  {
+    id: 'masterBedroom',
+    title: '主卧室空间',
+    questions: [
+      { id: 'q8_1', title: '是否考虑影音？', type: 'checkbox', options: ['电视', '投影', '音响'] },
+      { id: 'q8_2', title: '是否需要梳妆台或书台？', type: 'radio', options: ['是', '否'] },
+      { id: 'q8_3', title: '您对床尺寸需求？', type: 'radio', options: ['1.5米', '1.8米', '2米'], hasExtra: true, extraPlaceholder: '其他尺寸' },
+      { id: 'q8_4', title: '床头柜更希望什么形状？', type: 'radio', options: ['长方形', '椭圆形', '圆形', '异形'] },
+      { id: 'q8_5', title: '您是否有在床上阅读的习惯？', type: 'radio', options: ['是', '否'] },
+      { id: 'q8_6', title: '是否需要设置一个有座位的休息区域？', type: 'radio', options: ['是', '否'] },
+      { id: 'q8_7', title: '对卧室灯光有无特殊需求或禁忌？', type: 'text', placeholder: '请填写' },
+      { id: 'q8_8', title: '是否需要放置地毯？', type: 'radio', options: ['是', '否'] },
+      { id: 'q8_9', title: '是否需要考虑夜灯系统？', type: 'radio', options: ['是', '否'] },
+    ]
+  },
+  {
+    id: 'wardrobe',
+    title: '主卧室衣帽间',
+    questions: [
+      { id: 'q9_1', title: '衣帽间分类的方式要求？', type: 'radio', options: ['男女主人分别设置衣帽间', '按品类划分衣帽间区域'] },
+      { id: 'q9_2', title: '衣帽间配置需求', type: 'checkbox', options: ['工作岛台', '梳妆台', '首饰柜', '帽架', '熨（挂）烫机', '换衣凳', '穿衣镜', '保险柜'], hasExtra: true, extraPlaceholder: '其他要求' },
+      { id: 'q9_3', title: '是否需要增加衣物管家（自动蒸汽熨烫+短时除味）？', type: 'radio', options: ['是', '否'] },
+      { id: 'q9_4', title: '衣帽间的柜体考虑开放的挂架还是带有封闭柜门？', type: 'radio', options: ['挂架', '带有封闭柜门', '开放与封闭混合'] },
+      { id: 'q9_5', title: '是否有需要特殊展示的衣物、球鞋等物品？', type: 'radio', options: ['是', '否'], hasExtra: true, extraPlaceholder: '具体物品名称及要求' },
+      { id: 'q9_6', title: '是否要打造为社交型衣帽间？', type: 'radio', options: ['是', '否'] },
+      { id: 'q9_7', title: '是否考虑使用可移动式的衣帽间系统？', type: 'radio', options: ['是', '否'] },
+      { id: 'q9_8', title: '是否需要增加转表器？', type: 'radio', options: ['是', '否'] },
+      { id: 'q9_9', title: '男主人需要放置鞋子类别', type: 'checkbox', options: ['皮鞋', '球鞋', '长靴', '中靴', '短靴'] },
+      { id: 'q9_10', title: '女士包的数量及尺寸要求', type: 'text', placeholder: '请说明尺寸及数量' },
+      { id: 'q9_11', title: '女主人需要放置鞋子类别', type: 'checkbox', options: ['高跟鞋', '平跟鞋', '长靴', '中靴', '短靴'] },
+      { id: 'q9_12', title: '女主人的衣物在衣帽间中的占比要求', type: 'radio', options: ['50%', '60%', '70%', '80%', '90%'] },
+    ]
+  },
+  {
+    id: 'masterBath',
+    title: '主卧卫生间',
+    questions: [
+      { id: 'q10_1', title: '面盆配置数量', type: 'radio', options: ['双面盆', '单面盆'] },
+      { id: 'q10_2', title: '面盆形式', type: 'radio', options: ['台上盆', '台下盆'] },
+      { id: 'q10_3', title: '坐便器旁是否增加冲洗坐便器的手持龙头？', type: 'radio', options: ['是', '否'] },
+      { id: 'q10_4', title: '是否需要增加收纳镜柜？', type: 'radio', options: ['是', '否'] },
+      { id: 'q10_5', title: '喜欢什么样的坐便器形式？', type: 'radio', options: ['挂墙式坐便器', '常规落地式坐便器'] },
+      { id: 'q10_6', title: '坐便器是否需要智能功能？', type: 'radio', options: ['是', '否'] },
+      { id: 'q10_7', title: '坐便器是否封闭为独立的空间？', type: 'radio', options: ['是', '否'] },
+      { id: 'q10_8', title: '淋浴区需要封闭的淋浴房还是单片玻璃做半遮挡？', type: 'radio', options: ['全封闭', '半封闭'] },
+      { id: 'q10_9', title: '淋浴房花洒形式？', type: 'radio', options: ['墙装明杆', '墙装暗埋', '顶装明杆', '顶装暗埋'] },
+      { id: 'q10_10', title: '淋浴房内是否设置座位？', type: 'radio', options: ['是', '否'] },
+      { id: 'q10_11', title: '淋浴房高度需要通顶的还是常规高度？', type: 'radio', options: ['通顶', '常规高度'] },
+      { id: 'q10_12', title: '淋浴房内是否增加壁龛？', type: 'radio', options: ['是', '否'] },
+      { id: 'q10_13', title: '浴缸独立放置还是砌筑嵌入？使用人数？', type: 'radio', options: ['独立单人', '独立双人', '砌筑单人', '砌筑双人'] },
+      { id: 'q10_14', title: '您喜欢什么样的浴缸形状？', type: 'radio', options: ['三角形', '长方形', '椭圆形', '圆形', '其它形状'] },
+      { id: 'q10_15', title: '您的浴缸是否需要带有按摩功能？', type: 'radio', options: ['是', '否'] },
+      { id: 'q10_16', title: '是否需要汗蒸房？', type: 'radio', options: ['是', '否'] },
+      { id: 'q10_17', title: '是否需要暖风浴霸？', type: 'radio', options: ['是', '否'] },
+      { id: 'q10_18', title: '是否需要增加防水电视？', type: 'radio', options: ['是', '否'] },
+      { id: 'q10_19', title: '是否需要小冰箱用于储藏化妆品？', type: 'radio', options: ['是', '否'] },
+      { id: 'q10_20', title: '是否需要在此空间内增加一台洗衣机？', type: 'radio', options: ['是', '否'] },
+      { id: 'q10_21', title: '此空间是否需要按摩床？', type: 'radio', options: ['是', '否'] },
+    ]
+  },
+  {
+    id: 'study',
+    title: '书房',
+    questions: [
+      { id: 'q11_1', title: '是否需要考虑喝茶功能或设置专业茶台？', type: 'radio', options: ['是', '否'] },
+      { id: 'q11_2', title: '您喜欢书房是开放式的还是私密的封闭空间？', type: 'radio', options: ['开放', '私密'] },
+      { id: 'q11_3', title: '此空间是否考虑加入收藏功能？', type: 'radio', options: ['是', '否'] },
+      { id: 'q11_4', title: '此空间需要几个人同时使用？', type: 'radio', options: ['1人', '2人', '3人', '更多'] },
+      { id: 'q11_5', title: '此空间是否兼顾佛堂功能？', type: 'radio', options: ['是', '否'] },
+      { id: 'q11_6', title: '此空间要摆放哪类物品？', type: 'checkbox', options: ['书', '碟片', '工艺品'], hasExtra: true, extraPlaceholder: '其他' },
+      { id: 'q11_7', title: '您在此空间要放置的书籍数量？', type: 'radio', options: ['很多', '较多', '一般', '较少', '很少'] },
+      { id: 'q11_8', title: '此空间是否需要远程视频或电话会议？', type: 'radio', options: ['是', '否'] },
+      { id: 'q11_9', title: '此空间其他需求配置', type: 'checkbox', options: ['打印机', '电话/传真机', '冰箱', '雪茄柜', '投影/电视', '文件保险柜', '台式机'] },
+      { id: 'q11_10', title: '此空间柜体形式', type: 'radio', options: ['开放', '封闭'], hasExtra: true, extraPlaceholder: '特殊尺寸及形式' },
+    ]
+  },
+  {
+    id: 'elderly',
+    title: '长辈卧室',
+    questions: [
+      { id: 'q12_1', title: '使用功能需求', type: 'checkbox', options: ['看电视', '阅读', '书写', '品茶', '梳妆', '上网', '听音乐'], hasExtra: true, extraPlaceholder: '其他使用功能' },
+      { id: 'q12_2', title: '床尺寸需求', type: 'radio', options: ['1.5米', '1.8米', '2米'], hasExtra: true, extraPlaceholder: '其他尺寸' },
+      { id: 'q12_3', title: '是否需要药柜？', type: 'radio', options: ['是', '否'] },
+      { id: 'q12_4', title: '是否需要设置两张独立单人床？', type: 'radio', options: ['是', '否'] },
+      { id: 'q12_5', title: '是否考虑专业无障碍设计？', type: 'radio', options: ['是', '否'] },
+      { id: 'q12_6', title: '是否需要放置保险柜？', type: 'radio', options: ['是', '否'] },
+      { id: 'q12_7', title: '日常习惯在床上还是沙发上看电视？', type: 'radio', options: ['床上', '沙发上'] },
+    ]
+  },
+  {
+    id: 'children',
+    title: '儿童卧室',
+    questions: [
+      { id: 'q13_1', title: '您家里有几个孩子？分别的年龄、性别？', type: 'text', placeholder: '请说明孩子的年龄和性别' },
+      { id: 'q13_2', title: '需要几间儿童房？', type: 'radio', options: ['一间', '两间', '三间', '更多'] },
+      { id: 'q13_3', title: '哪个房间需要卫生间套间？', type: 'text', placeholder: '请说明' },
+      { id: 'q13_4', title: '床尺寸需求', type: 'radio', options: ['1.5米', '1.8米', '2米', '高低床'], hasExtra: true, extraPlaceholder: '其他尺寸' },
+      { id: 'q13_5', title: '孩子独立居住还是有家人陪同？', type: 'radio', options: ['独立居住', '家人陪同'] },
+      { id: 'q13_6', title: '孩子平时有什么兴趣爱好？', type: 'checkbox', options: ['绘画', '书法', '器乐', '唱歌', '跳舞', '足球', '乐高', '篮球', '棋类'], hasExtra: true, extraPlaceholder: '其他爱好' },
+      { id: 'q13_7', title: '孩子特别喜爱什么颜色？', type: 'checkbox', options: ['黄色', '红色', '蓝色', '绿色', '紫色', '黑色', '白色', '灰色'] },
+      { id: 'q13_8', title: '房间内需要陈列玩具吗？', type: 'radio', options: ['需要', '不需要'] },
+      { id: 'q13_9', title: '房间内需要单独的学习空间吗？', type: 'radio', options: ['需要', '不需要'] },
+      { id: 'q13_10', title: '房间内需要钢琴或其它乐器吗？', type: 'radio', options: ['需要', '不需要'], hasExtra: true, extraPlaceholder: '其它乐器' },
+    ]
+  },
+  {
+    id: 'guestRoom',
+    title: '客人卧室',
+    questions: [
+      { id: 'q14_1', title: '需要几间客房？', type: 'radio', options: ['一间', '两间', '三间'], hasExtra: true, extraPlaceholder: '更多请说明' },
+      { id: 'q14_2', title: '基本配置要求', type: 'checkbox', options: ['床', '衣柜', '电视', '字台', '沙发'] },
+      { id: 'q14_3', title: '床尺寸要求', type: 'radio', options: ['1.5米', '1.8米', '2米'], hasExtra: true, extraPlaceholder: '其他尺寸' },
+      { id: 'q14_4', title: '其他需求', type: 'text', placeholder: '请说明' },
+    ]
+  },
+  {
+    id: 'familyRoom',
+    title: '家庭起居厅',
+    questions: [
+      { id: 'q15_1', title: '使用功能及需求', type: 'checkbox', options: ['家庭聚会', '工作及商务接待', '朋友来访', '邻居来访', '小朋友聚会', '不接待客人', '家庭私教上门'], hasExtra: true, extraPlaceholder: '其他' },
+      { id: 'q15_2', title: '家具布置需求', type: 'radio', options: ['沙发3+2+1等常规布局', '组合转角沙发布局', '对坐沙发形式', '沙发自由摆放', '不想要沙发，想要一个自由的开敞空间'] },
+      { id: 'q15_3', title: '此空间是否需要电视？', type: 'radio', options: ['需要', '不需要'] },
+      { id: 'q15_4', title: '此空间是否需要钢琴或其它乐器？', type: 'radio', options: ['需要', '不需要'], hasExtra: true, extraPlaceholder: '其它乐器' },
+      { id: 'q15_5', title: '此空间是否需要壁炉？', type: 'radio', options: ['需要', '不需要'] },
+      { id: 'q15_6', title: '此空间是否需要展示艺术品？', type: 'radio', options: ['需要', '不需要', '其它需求'] },
+    ]
+  },
+  {
+    id: 'secondaryBath',
+    title: '次卫生间',
+    questions: [
+      { id: 'q16_1', title: '卫生间需要有泡澡的需求吗？', type: 'radio', options: ['是', '否'] },
+      { id: 'q16_2', title: '能否接受在浴缸中淋浴？', type: 'radio', options: ['是', '否'] },
+      { id: 'q16_3', title: '哪个卫生间需要智能坐便器？', type: 'text', placeholder: '请说明' },
+      { id: 'q16_4', title: '哪个卫生间需要设置梳妆台？', type: 'text', placeholder: '请说明' },
+      { id: 'q16_5', title: '哪个卫生间需要有电视？', type: 'text', placeholder: '请说明' },
+      { id: 'q16_6', title: '是否考虑镜柜收纳？', type: 'radio', options: ['是', '否'] },
+    ]
+  },
+  {
+    id: 'waterBar',
+    title: '家庭水吧',
+    questions: [
+      { id: 'q17_1', title: '哪层需要有独立饮水点？', type: 'checkbox', options: ['地下二层', '地下一层', '一层厨房', '二层', '三层'], hasExtra: true, extraPlaceholder: '其他空间' },
+      { id: 'q17_2', title: '是否需要嵌入小冰箱？', type: 'radio', options: ['是', '否'] },
+      { id: 'q17_3', title: '是否需要直饮水设备？', type: 'radio', options: ['是', '否'] },
+      { id: 'q17_4', title: '哪些空间需要放置独立的水盆？', type: 'checkbox', options: ['B3', 'B2', 'B1', 'F1', 'F2', 'F3', 'F4', '阁楼'] },
+    ]
+  },
+  {
+    id: 'cleaning',
+    title: '家政清洁空间',
+    questions: [
+      { id: 'q18_1', title: '是否需要独立的家政物品收纳间？', type: 'radio', options: ['是', '否'] },
+      { id: 'q18_2', title: '需要哪些家政清洁工具？', type: 'checkbox', options: ['中央吸尘', '泳池/汤池清洁与除味装置', '便捷式吸尘器', '拖把', '扫地机器人'], hasExtra: true, extraPlaceholder: '其他工具' },
+    ]
+  },
+  {
+    id: 'laundry',
+    title: '洗衣房',
+    questions: [
+      { id: 'q19_1', title: '是否需要独立洗衣房？', type: 'radio', options: ['是', '否'] },
+      { id: 'q19_2', title: '配置电器数量：洗衣机', type: 'radio', options: ['一台', '两台', '三台', '更多'] },
+      { id: 'q19_3', title: '配置电器数量：干衣机', type: 'radio', options: ['一台', '两台', '三台', '更多'] },
+      { id: 'q19_4', title: '洗衣房配置要求', type: 'checkbox', options: ['手洗衣物池', '熨烫设备', '熨烫台', '脏衣篓', '衣物临时存放柜', '洗衣用品收纳柜', '预留挂式吸尘器位置', '墩布池', '晾衣架'] },
+      { id: 'q19_5', title: '衣服是晾干还是烘干？', type: 'radio', options: ['晾干', '烘干'] },
+      { id: 'q19_6', title: '洗衣机是否预留生活热水端口？', type: 'radio', options: ['需要', '不需要'] },
+      { id: 'q19_7', title: '洗衣房是工人使用频率高还是家人使用高？', type: 'radio', options: ['工人', '家人'] },
+      { id: 'q19_8', title: '您希望洗衣房在地下空间还是楼上？', type: 'radio', options: ['地下', '楼上'] },
+    ]
+  },
+  {
+    id: 'workerRoom',
+    title: '工人房',
+    questions: [
+      { id: 'q20_1', title: '家里常住工人有几名？', type: 'radio', options: ['1人', '2人', '三人', '更多'] },
+      { id: 'q20_2', title: '需要几个工人房间？', type: 'radio', options: ['一间', '两间', '三间', '更多'] },
+      { id: 'q20_3', title: '是否需要给他们设置独立的就餐及交流区域？', type: 'radio', options: ['是', '否'] },
+      { id: 'q20_4', title: '工人房是否都需要采光？', type: 'radio', options: ['是', '否'] },
+      { id: 'q20_5', title: '工人房配置要求', type: 'checkbox', options: ['单独卫生间', '活动衣柜', '床头柜', '单人床', '上下铺', '电视', '书桌', '书椅'], hasExtra: true, extraPlaceholder: '其它配置需求' },
+    ]
+  },
+  {
+    id: 'sports',
+    title: '运动空间',
+    questions: [
+      { id: 'q21_1', title: '您家对运动系统的需求有哪些？', type: 'checkbox', options: ['健身房', '瑜伽室', '台球室', '乒乓球室', '室内高尔夫室', '泳池', '舞蹈室', '拳室', '室内攀岩'], hasExtra: true, extraPlaceholder: '其他运动系统' },
+      { id: 'q21_2', title: '您将匹配哪些运动器械？', type: 'checkbox', options: ['跑步机', '划船机', '动感单车', '椭圆仪', '拉力器', '臂屈伸练习架', '卧推架', '台阶器', '蝴蝶机', '龙门架', '骑马机', '史密斯架', '哑铃椅', '罗马凳', '腹肌椅', '牧师椅'] },
+    ]
+  },
+  {
+    id: 'spiritual',
+    title: '精神人文空间',
+    questions: [
+      { id: 'q22_1', title: '是否需要以下特殊的私属空间？', type: 'checkbox', options: ['佛堂', '冥想室', '禅房', '茶道室', '音乐室', '画室', '艺术品收藏室'] },
+      { id: 'q22_2', title: '是否考虑使用艺术品提升空间的精神气质？', type: 'radio', options: ['是', '否'], hasExtra: true, extraPlaceholder: '其他要求' },
+    ]
+  },
+  {
+    id: 'media',
+    title: '影音室',
+    questions: [
+      { id: 'q23_1', title: '您是否需要一个专业的家庭影院？', type: 'radio', options: ['需要', '不需要'] },
+      { id: 'q23_2', title: '希望做专业的观影电动座椅还是自由的沙发组合？', type: 'radio', options: ['专业功能座椅', '休闲沙发组合'] },
+      { id: 'q23_3', title: '家庭影院同时可以供多少人使用？', type: 'radio', options: ['3-5人', '6-8人', '8-12人', '12人以上'] },
+      { id: 'q23_4', title: '需要兼顾卡拉OK功能吗？', type: 'radio', options: ['需要', '不需要'] },
+      { id: 'q23_5', title: '影院中还需要考虑其它功能吗？', type: 'text', placeholder: '请说明其他要求' },
+    ]
+  },
+  {
+    id: 'wine',
+    title: '酒窖空间',
+    questions: [
+      { id: 'q24_1', title: '酒窖您主要储存哪种酒类？', type: 'radio', options: ['红酒', '白酒', '洋酒', '各类均有'] },
+      { id: 'q24_2', title: '酒窖是否需要恒温恒湿设备？', type: 'radio', options: ['需要', '不需要'] },
+      { id: 'q24_3', title: '各类酒品要储存的数量', type: 'multi-text', fields: [
+        { key: 'redWine', placeholder: '红酒数量（瓶）', label: '红酒' },
+        { key: 'whiteWine', placeholder: '白酒数量（瓶）', label: '白酒' },
+        { key: 'foreignWine', placeholder: '洋酒数量（瓶）', label: '洋酒' },
+      ]},
+      { id: 'q24_4', title: '酒窖中需要增加雪茄储存空间吗？', type: 'radio', options: ['需要', '不需要'] },
+      { id: 'q24_5', title: '酒窖更倾向于透明展示空间还是密闭私藏空间？', type: 'radio', options: ['透明展示空间', '密闭私藏空间'] },
+      { id: 'q24_6', title: '酒窖中还需要考虑其它功能吗？', type: 'text', placeholder: '请说明' },
+    ]
+  },
+  {
+    id: 'otherNeeds',
+    title: '其他需求',
+    questions: [
+      { id: 'q25_1', title: '您及您的家人有无宗教信仰？', type: 'radio', options: ['有', '没有'], hasExtra: true, extraPlaceholder: '若有，请说明' },
+      { id: 'q25_2', title: '是否有原有家具打算用在新房中？', type: 'radio', options: ['有', '没有'], hasExtra: true, extraPlaceholder: '若有，请说明' },
+      { id: 'q25_3', title: '您家人是否有经常吸烟的习惯？', type: 'radio', options: ['有', '没有'] },
+      { id: 'q25_4', title: '是否有专门的风水师介入设计？', type: 'radio', options: ['有', '没有'], hasExtra: true, extraPlaceholder: '请说明，以便我们做好衔接配合' },
+    ]
+  },
+  {
+    id: 'personalized',
+    title: '个性化空间',
+    questions: [
+      { id: 'q26_1', title: '您还需要哪些个性化空间？', type: 'checkbox', options: [
+        '家庭影院', 'KTV', '布草间', '器械健身房', 'HiFi厅', '乐器工作室',
+        '高尔夫模拟室', '艺术廊', '腌制室', '保龄球馆', '工坊', '榻榻米',
+        '游戏室', '德州扑克', '台球室', '情趣房', '棋牌室', '机车工作室',
+        '乒乓球室', '发泄室', '模型室', '天文室', '瑜伽室', '醒酒室',
+        '胶片室', '实验室', '摄影展示区', '聚会厅', '动物乐园', '会议室',
+        '篮球室', '金库', '桑拿室', '化妆间', '避难室', '按摩室',
+        '美容室', '拳击室', '医疗室', '艾灸室', '家庭图书馆', '怀先堂',
+        'SPA', '家庭博物馆', '理发室', '酒窖', '家庭剧院', '木工间',
+        '酒吧', '个人工作室', '录音棚', '攀岩区', '乐高空间', '雪茄吧',
+        '啤酒屋', '水族馆', '动漫室', '节日装置房'
+      ]},
+    ]
+  },
+  {
+    id: 'floorPlan',
+    title: '分层功能需求',
+    questions: [
+      { id: 'q27_1', title: '地下空间您需要我们设计的功能有', type: 'checkbox', options: [
+        '影音室', '密室', '健身房', '棋牌室', '茶室', '电竞室',
+        '酒窖', '酒吧', '洗衣房', '工人房', '司机房', '榻榻米',
+        '台球厅', '储物间', '沙发休闲区', '雪茄吧', '书房', 'SPA',
+        '泳池', '儿童娱乐区', '宴会厅', '客房'
+      ], hasExtra: true, extraPlaceholder: '其他功能需求' },
+      { id: 'q27_2', title: '首层您需要我们设计的功能有', type: 'checkbox', options: [
+        '客厅', '中厨', '西厨', '餐厅', '老人房', '茶室', '书房',
+        '家庭教室', '衣帽间', '榻榻米', '会议室', '客房'
+      ], hasExtra: true, extraPlaceholder: '其他功能需求' },
+      { id: 'q27_3', title: '二层及以上您需要我们设计的功能有', type: 'checkbox', options: [
+        '主卧室', '衣帽间', '女儿房', '男孩房', '图书室', '客房',
+        '儿童学习室', '书房', '起居室', '佛堂', '健身房'
+      ], hasExtra: true, extraPlaceholder: '其他功能需求' },
+    ]
+  }
+];
+
+// ===== STATE =====
+let currentSectionIdx = 0;
+let currentQuestionIdx = 0;
+let answers = {};
+let currentAnswer = null; // single-select value
+let currentMultiAnswer = []; // multi-select values
+let currentTextAnswer = '';
+let currentMultiTextAnswer = {};
+let currentPrefixAnswer = '';
+let currentChildInfo = [];
+let currentRadioGroupAnswer = {};
+
+// ===== FLATTEN ALL QUESTIONS =====
+let allQuestions = [];
+sections.forEach(s => {
+  if (s.questions) {
+    s.questions.forEach(q => {
+      allQuestions.push({ sectionId: s.id, sectionTitle: s.title, ...q });
+    });
+  }
+});
+
+// ===== NAVIGATION =====
+function showSectionLabel() {
+  const q = allQuestions[currentQuestionIdx];
+  const section = sections.find(s => s.id === q.sectionId);
+  document.getElementById('sectionLabel').textContent = section ? section.title : '';
+}
+
+function updateProgress() {
+  const total = allQuestions.length;
+  const pct = Math.round((currentQuestionIdx / total) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').textContent = pct + '%';
+}
+
+function showProgress() {
+  document.getElementById('progressBar').style.display = 'block';
+}
+
+function hideProgress() {
+  document.getElementById('progressBar').style.display = 'none';
+}
+
+// ===== ANSWER COLLECTION =====
+function saveCurrentAnswer(q) {
+  if (q.type === 'checkbox') {
+    answers[q.id] = [...currentMultiAnswer];
+    if (currentExtraText) answers[q.id + '__extra'] = currentExtraText;
+  } else if (q.type === 'multi-text') {
+    answers[q.id] = {...currentMultiTextAnswer};
+  } else if (q.type === 'radio-group') {
+    answers[q.id] = {...currentRadioGroupAnswer};
+  } else if (q.type === 'child-info') {
+    answers[q.id] = [...currentChildInfo];
+  } else if (q.type === 'choice-text') {
+    answers[q.id] = { choice: currentAnswer, text: currentExtraText };
+  } else if (q.type === 'text') {
+    answers[q.id] = currentTextAnswer;
+    if (currentPrefixAnswer) answers[q.id + '__prefix'] = currentPrefixAnswer;
+  } else {
+    answers[q.id] = currentAnswer;
+    if (currentExtraText) answers[q.id + '__extra'] = currentExtraText;
+  }
+}
+
+function loadCurrentAnswer(q) {
+  const saved = answers[q.id];
+  if (q.type === 'checkbox') {
+    currentMultiAnswer = Array.isArray(saved) ? [...saved] : [];
+    currentExtraText = answers[q.id + '__extra'] || '';
+  } else if (q.type === 'multi-text') {
+    currentMultiTextAnswer = (saved && typeof saved === 'object') ? {...saved} : {};
+  } else if (q.type === 'radio-group') {
+    currentRadioGroupAnswer = (saved && typeof saved === 'object') ? {...saved} : {};
+  } else if (q.type === 'child-info') {
+    currentChildInfo = Array.isArray(saved) ? [...saved] : [];
+  } else if (q.type === 'choice-text') {
+    currentAnswer = (saved && saved.choice) ? saved.choice : null;
+    currentExtraText = (saved && saved.text) ? saved.text : '';
+  } else {
+    currentAnswer = (saved && typeof saved === 'string') ? saved : null;
+    currentExtraText = answers[q.id + '__extra'] || '';
+    currentPrefixAnswer = answers[q.id + '__prefix'] || '';
+  }
+}
+
+let currentExtraText = '';
+
+// ===== RENDER =====
+function clearAnswerState() {
+  currentAnswer = null;
+  currentMultiAnswer = [];
+  currentTextAnswer = '';
+  currentMultiTextAnswer = {};
+  currentPrefixAnswer = '';
+  currentChildInfo = [];
+  currentExtraText = '';
+  currentRadioGroupAnswer = {};
+}
+
+function renderQuestion(q, idx, animate) {
+  const container = document.getElementById('mainContainer');
+  loadCurrentAnswer(q);
+
+  const isLast = idx >= allQuestions.length - 1;
+  const section = sections.find(s => s.id === q.sectionId);
+  const qNum = idx + 1;
+  const animClass = animate ? '' : ' no-anim';
+
+  let html = `<div class="question-card${animClass}">`;
+  html += `<div class="question-number">${section ? section.title : ''} · 第 ${qNum}/${allQuestions.length} 题</div>`;
+  html += `<div class="question-title">${q.title}</div>`;
+  if (q.subtitle) html += `<div class="question-subtitle">${q.subtitle}</div>`;
+
+  if (q.type === 'radio' || q.type === 'choice-text') {
+    html += `<div class="options-list" id="optList">`;
+    (q.options || []).forEach(opt => {
+      const sel = currentAnswer === opt ? ' selected' : '';
+      html += `<button class="option-btn${sel}" data-value="${escapeHtml(opt)}">
+        <span class="option-radio"></span>${opt}
+      </button>`;
+    });
+    html += '</div>';
+    if (q.hasExtra && currentAnswer && currentAnswer !== '否' && currentAnswer !== '没有' && currentAnswer !== '暂时没有' && currentAnswer !== '不需要') {
+      html += `<input class="text-input" id="extraInput" style="margin-top:12px" placeholder="${q.extraPlaceholder || '请说明'}" value="${escapeHtml(currentExtraText)}">`;
+    } else if (q.type === 'choice-text' && currentAnswer === '期房') {
+      html += `<input class="text-input" id="extraInput" style="margin-top:12px" placeholder="${q.textLabel || '请说明'}" value="${escapeHtml(currentExtraText)}">`;
+    } else if (q.hasExtra || q.type === 'choice-text') {
+      html += '<div id="extraSlot"></div>';
+    }
+
+  } else if (q.type === 'checkbox') {
+    html += `<div class="options-list" id="optList">`;
+    (q.options || []).forEach(opt => {
+      const sel = currentMultiAnswer.includes(opt) ? ' selected' : '';
+      html += `<button class="option-btn${sel}" data-value="${escapeHtml(opt)}">
+        <span class="option-check"></span>${opt}
+      </button>`;
+    });
+    html += '</div>';
+    if (q.hasExtra) {
+      html += `<input class="text-input" id="extraInput" style="margin-top:12px" placeholder="${q.extraPlaceholder || '其他需求请填写'}" value="${escapeHtml(currentExtraText)}">`;
+    }
+
+  } else if (q.type === 'text') {
+    if (q.prefix) {
+      html += `<div style="margin-bottom:8px;font-size:14px;color:var(--text-light)">${q.prefixLabel || '称谓'}</div>`;
+      html += '<div class="options-list" style="flex-direction:row;margin-bottom:14px" id="prefixList">';
+      (q.prefixOptions || []).forEach(opt => {
+        const sel = currentPrefixAnswer === opt ? ' selected' : '';
+        html += `<button class="option-btn${sel}" data-value="${escapeHtml(opt)}" style="flex:1;justify-content:center">
+          <span class="option-radio"></span>${opt}
+        </button>`;
+      });
+      html += '</div>';
+    }
+    html += `<input class="text-input" id="textInput" placeholder="${q.placeholder || '请输入'}" value="${escapeHtml(currentTextAnswer)}">`;
+
+  } else if (q.type === 'multi-text') {
+    html += '<div style="display:flex;flex-direction:column;gap:12px">';
+    (q.fields || []).forEach(f => {
+      const val = currentMultiTextAnswer[f.key] || '';
+      html += `<div>
+        <label style="font-size:13px;color:var(--text-light);display:block;margin-bottom:4px">${f.label}</label>
+        <input class="text-input field-input" data-key="${f.key}" placeholder="${f.placeholder}" value="${escapeHtml(val)}">
+      </div>`;
+    });
+    html += '</div>';
+
+  } else if (q.type === 'radio-group') {
+    (q.groups || []).forEach(g => {
+      html += `<div style="margin-bottom:16px">
+        <div style="font-size:14px;color:var(--accent);font-weight:600;margin-bottom:8px">${g.label}</div>
+        <div class="options-list" style="flex-direction:row;flex-wrap:wrap;gap:8px" data-group="${escapeHtml(g.label)}" id="rg_${escapeHtml(g.label)}">`;
+      g.options.forEach(opt => {
+        const sel = currentRadioGroupAnswer[g.label] === opt ? ' selected' : '';
+        html += `<button class="option-btn${sel}" data-value="${escapeHtml(opt)}" data-group="${escapeHtml(g.label)}">
+          <span class="option-radio"></span>${opt}
+        </button>`;
+      });
+      html += '</div></div>';
+    });
+
+  } else if (q.type === 'child-info') {
+    html += '<div style="display:flex;flex-direction:column;gap:10px">';
+    ['男孩', '女孩'].forEach((label, i) => {
+      html += `<div style="display:flex;align-items:center;gap:8px">
+        <span style="width:40px;font-size:14px;font-weight:500">${label}</span>
+        <input class="text-input child-name" data-idx="${i}" placeholder="姓名" style="flex:1" value="${escapeHtml(currentChildInfo[i]?.name || '')}">
+        <input class="text-input child-age" data-idx="${i}" placeholder="年龄" style="width:80px" value="${escapeHtml(currentChildInfo[i]?.age || '')}">
+      </div>`;
+    });
+    html += '</div>';
+  }
+
+  html += '<div class="btn-row">';
+  if (idx > 0) {
+    html += '<button class="btn btn-secondary" id="prevBtn">← 上一题</button>';
+  } else {
+    html += '<span></span>';
+  }
+  html += `<button class="btn btn-primary" id="nextBtn">${isLast ? '完成 ✓' : '下一题 →'}</button>`;
+  html += '</div></div>';
+
+  container.innerHTML = html;
+
+  attachListeners(q, idx, isLast);
+}
+
+function attachListeners(q, idx, isLast) {
+  // Navigation buttons
+  document.getElementById('nextBtn').addEventListener('click', () => nextQuestion());
+  const prevBtn = document.getElementById('prevBtn');
+  if (prevBtn) prevBtn.addEventListener('click', () => prevQuestion());
+
+  // Option buttons (radio, checkbox, prefix) — update DOM in-place
+  document.querySelectorAll('#optList .option-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const val = this.dataset.value;
+      const parent = this.parentElement;
+      const isCheckbox = this.querySelector('.option-check');
+
+      if (isCheckbox) {
+        if (currentMultiAnswer.includes(val)) {
+          currentMultiAnswer = currentMultiAnswer.filter(v => v !== val);
+          this.classList.remove('selected');
+        } else {
+          currentMultiAnswer.push(val);
+          this.classList.add('selected');
+        }
+      } else {
+        currentAnswer = val;
+        parent.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+        this.classList.add('selected');
+        handleExtraInput(q, val);
+      }
+      saveCurrentAnswer(q);
+    });
+  });
+
+  // Prefix buttons (inside #prefixList)
+  document.querySelectorAll('#prefixList .option-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const val = this.dataset.value;
+      currentPrefixAnswer = val;
+      const parent = this.parentElement;
+      parent.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+      this.classList.add('selected');
+      saveCurrentAnswer(q);
+    });
+  });
+
+  // Radio group buttons
+  document.querySelectorAll('[data-group]').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const group = this.dataset.group;
+      const val = this.dataset.value;
+      currentRadioGroupAnswer[group] = val;
+      const groupContainer = document.getElementById('rg_' + escapeHtml(group));
+      if (groupContainer) {
+        groupContainer.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+      }
+      this.classList.add('selected');
+      saveCurrentAnswer(q);
+    });
+  });
+
+  // Text input
+  const textInput = document.getElementById('textInput');
+  if (textInput) {
+    textInput.addEventListener('input', () => {
+      currentTextAnswer = textInput.value;
+      saveCurrentAnswer(q);
+    });
+    textInput.focus();
+    textInput.setSelectionRange(textInput.value.length, textInput.value.length);
+  }
+
+  // Extra input
+  const extraInput = document.getElementById('extraInput');
+  if (extraInput) {
+    extraInput.addEventListener('input', () => {
+      currentExtraText = extraInput.value;
+      saveCurrentAnswer(q);
+    });
+  }
+
+  // Multi-text fields
+  document.querySelectorAll('.field-input').forEach(inp => {
+    inp.addEventListener('input', () => {
+      currentMultiTextAnswer[inp.dataset.key] = inp.value;
+      saveCurrentAnswer(q);
+    });
+  });
+
+  // Child info
+  document.querySelectorAll('.child-name').forEach(inp => {
+    const i = parseInt(inp.dataset.idx);
+    if (!currentChildInfo[i]) currentChildInfo[i] = { name: '', age: '' };
+    inp.addEventListener('input', () => { currentChildInfo[i].name = inp.value; saveCurrentAnswer(q); });
+  });
+  document.querySelectorAll('.child-age').forEach(inp => {
+    const i = parseInt(inp.dataset.idx);
+    if (!currentChildInfo[i]) currentChildInfo[i] = { name: '', age: '' };
+    inp.addEventListener('input', () => { currentChildInfo[i].age = inp.value; saveCurrentAnswer(q); });
+  });
+
+  // Keyboard: Enter to advance
+  document.querySelector('.question-card').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+      e.preventDefault();
+      document.getElementById('nextBtn').click();
+    }
+  });
+}
+
+function handleExtraInput(q, val) {
+  const extraSlot = document.getElementById('extraSlot');
+  const existingExtra = document.getElementById('extraInput');
+
+  const shouldShow = q.hasExtra && val && val !== '否' && val !== '没有' && val !== '暂时没有' && val !== '不需要';
+  const shouldShowChoice = q.type === 'choice-text' && val === '期房';
+
+  if (shouldShow || shouldShowChoice) {
+    if (!existingExtra) {
+      const label = q.extraPlaceholder || q.textLabel || '请说明';
+      const inp = document.createElement('input');
+      inp.className = 'text-input';
+      inp.id = 'extraInput';
+      inp.style.marginTop = '12px';
+      inp.placeholder = label;
+      inp.value = currentExtraText;
+      inp.addEventListener('input', () => {
+        currentExtraText = inp.value;
+        saveCurrentAnswer(q);
+      });
+      if (extraSlot) {
+        extraSlot.replaceWith(inp);
+      } else {
+        const optList = document.getElementById('optList');
+        if (optList) optList.after(inp);
+      }
+    }
+  } else {
+    if (existingExtra) {
+      currentExtraText = '';
+      const slot = document.createElement('div');
+      slot.id = 'extraSlot';
+      existingExtra.replaceWith(slot);
+    }
+  }
+}
+
+function updateNextButton(q) {
+  const btn = document.getElementById('nextBtn');
+  if (!btn) return;
+  let hasAnswer = false;
+  if (q.type === 'checkbox') hasAnswer = currentMultiAnswer.length > 0 || currentExtraText.length > 0;
+  else if (q.type === 'text') hasAnswer = currentTextAnswer.length > 0;
+  else if (q.type === 'multi-text') hasAnswer = Object.values(currentMultiTextAnswer).some(v => v.length > 0);
+  else if (q.type === 'radio-group') hasAnswer = Object.keys(currentRadioGroupAnswer).length > 0;
+  else if (q.type === 'child-info') hasAnswer = currentChildInfo.length > 0;
+  else if (q.type === 'choice-text') hasAnswer = currentAnswer !== null;
+  else hasAnswer = currentAnswer !== null;
+  // Allow skip: don't disable, just let user proceed
+}
+
+// ===== NAVIGATION FUNCTIONS =====
+function nextQuestion() {
+  const q = allQuestions[currentQuestionIdx];
+  saveCurrentAnswer(q);
+
+  if (currentQuestionIdx >= allQuestions.length - 1) {
+    showCompletion();
+    return;
+  }
+
+  currentQuestionIdx++;
+  clearAnswerState();
+  showSectionLabel();
+  updateProgress();
+  renderQuestion(allQuestions[currentQuestionIdx], currentQuestionIdx, true);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function prevQuestion() {
+  if (currentQuestionIdx <= 0) return;
+  const q = allQuestions[currentQuestionIdx];
+  saveCurrentAnswer(q);
+  currentQuestionIdx--;
+  clearAnswerState();
+  showSectionLabel();
+  updateProgress();
+  renderQuestion(allQuestions[currentQuestionIdx], currentQuestionIdx, true);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ===== COMPLETION =====
+function showCompletion() {
+  updateProgress();
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('progressText').textContent = '100%';
+  document.getElementById('sectionLabel').textContent = '完成';
+
+  const container = document.getElementById('mainContainer');
+
+  let summary = '';
+  sections.forEach(s => {
+    if (!s.questions) return;
+    let hasContent = false;
+    let sectionHtml = `<h4>${s.title}</h4>`;
+    s.questions.forEach(q => {
+      const ans = answers[q.id];
+      if (!ans || (Array.isArray(ans) && ans.length === 0) || (typeof ans === 'object' && Object.keys(ans).length === 0 && !answers[q.id + '__extra'])) return;
+      hasContent = true;
+      let ansText = '';
+      if (q.type === 'checkbox') {
+        ansText = Array.isArray(ans) ? ans.join('、') : '';
+        if (answers[q.id + '__extra']) ansText += (ansText ? '；' : '') + answers[q.id + '__extra'];
+      } else if (q.type === 'multi-text') {
+        ansText = Object.entries(ans).map(([k, v]) => `${(q.fields||[]).find(f=>f.key===k)?.label||k}: ${v}`).join('；');
+      } else if (q.type === 'radio-group') {
+        ansText = Object.entries(ans).map(([k, v]) => `${k}: ${v}`).join('；');
+      } else if (q.type === 'child-info') {
+        ansText = ans.filter(c => c.name || c.age).map(c => `${c.name}(${c.age}岁)`).join('、');
+      } else if (q.type === 'choice-text') {
+        ansText = `${ans.choice || ''}`;
+        if (ans.text) ansText += ` — ${ans.text}`;
+      } else if (q.type === 'text') {
+        let prefix = answers[q.id + '__prefix'] ? answers[q.id + '__prefix'] + ' ' : '';
+        ansText = prefix + ans;
+      } else {
+        ansText = String(ans);
+        if (answers[q.id + '__extra']) ansText += '；' + answers[q.id + '__extra'];
+      }
+      sectionHtml += `<p><strong>${q.title}</strong>：${ansText}</p>`;
+    });
+    if (hasContent) summary += sectionHtml;
+  });
+
+  const emptyAnswers = allQuestions.filter(q => {
+    const ans = answers[q.id];
+    return !ans || (Array.isArray(ans) && ans.length === 0) || (typeof ans === 'object' && Object.keys(ans).length === 0);
+  });
+
+  const answeredCount = allQuestions.length - emptyAnswers.length;
+
+  container.innerHTML = `
+    <div class="question-card completion-card">
+      <div class="completion-icon">🎉</div>
+      <div class="completion-title">需求问卷已完成！</div>
+      <div class="completion-text">
+        您已回答了 <strong>${answeredCount}</strong> / ${allQuestions.length} 道问题<br>
+        感谢您花时间填写，我们将根据您的需求为您打造专属空间。
+      </div>
+      <div class="summary-section">${summary}</div>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <button class="btn btn-secondary" onclick="window.print()">打印结果</button>
+        <button class="btn btn-primary" onclick="resetQuestionnaire()">重新填写</button>
+      </div>
+    </div>
+  `;
+}
+
+function resetQuestionnaire() {
+  currentQuestionIdx = 0;
+  currentAnswer = null;
+  currentMultiAnswer = [];
+  currentTextAnswer = '';
+  currentMultiTextAnswer = {};
+  currentPrefixAnswer = '';
+  currentChildInfo = [];
+  currentExtraText = '';
+  currentRadioGroupAnswer = {};
+  answers = {};
+  showWelcome();
+}
+
+// ===== WELCOME SCREEN =====
+function showWelcome() {
+  hideProgress();
+  const container = document.getElementById('mainContainer');
+  container.innerHTML = `
+    <div class="question-card welcome-card">
+      <div class="welcome-logo">I&C SPACE</div>
+      <div class="welcome-tagline">
+        每一个住宅的属性都是独一无二，不可复制的<br>
+        设计是一场心灵的旅途，而非物质堆砌<br>
+        让我们共同开启美好生活之旅
+      </div>
+      <div class="welcome-stats">
+        <div class="welcome-stat">
+          <div class="welcome-stat-num">${allQuestions.length}</div>
+          <div class="welcome-stat-label">道需求问题</div>
+        </div>
+        <div class="welcome-stat">
+          <div class="welcome-stat-num">${sections.length - 1}</div>
+          <div class="welcome-stat-label">个空间板块</div>
+        </div>
+        <div class="welcome-stat">
+          <div class="welcome-stat-num">~10</div>
+          <div class="welcome-stat-label">分钟完成</div>
+        </div>
+      </div>
+      <button class="btn btn-primary start-btn" onclick="startQuestionnaire()">
+        开始填写 →
+      </button>
+    </div>
+  `;
+}
+
+function startQuestionnaire() {
+  currentQuestionIdx = 0;
+  clearAnswerState();
+  answers = {};
+  showProgress();
+  showSectionLabel();
+  updateProgress();
+  renderQuestion(allQuestions[0], 0, true);
+}
+
+// ===== UTILS =====
+function escapeHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// ===== KEYBOARD SUPPORT =====
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    const nextBtn = document.getElementById('nextBtn');
+    if (nextBtn && document.activeElement !== document.getElementById('textInput') && document.activeElement !== document.getElementById('extraInput') && !document.activeElement?.classList.contains('field-input') && !document.activeElement?.classList.contains('child-name') && !document.activeElement?.classList.contains('child-age')) {
+      e.preventDefault();
+      nextBtn.click();
+    }
+  }
+  if (e.key === 'ArrowLeft' && e.ctrlKey) {
+    e.preventDefault();
+    prevQuestion();
+  }
+  if (e.key === 'ArrowRight' && e.ctrlKey) {
+    e.preventDefault();
+    nextQuestion();
+  }
+});
+
+// ===== INIT =====
+showWelcome();
+</script>
+</body>
+</html>
