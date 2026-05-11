@@ -402,8 +402,10 @@
       font-size: 15px;
       min-height: 48px;
     }
-    .welcome-stats { gap: 16px; margin-bottom: 32px; }
-    .welcome-stat-num { font-size: 26px; }
+    .welcome-stats { flex-direction: column; gap: 20px; margin-bottom: 32px; align-items: center; }
+    .welcome-stat-num { font-size: 28px; }
+    .welcome-stat { padding: 0 20px; }
+    .welcome-stat + .welcome-stat { padding-top: 8px; border-top: 1px solid var(--border); }
     .welcome-logo { font-size: 24px; }
     .welcome-tagline { font-size: 14px; }
     .start-btn { padding: 16px 40px; font-size: 16px; }
